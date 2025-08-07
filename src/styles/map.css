@@ -1,0 +1,16 @@
+/* Additional Leaflet customizations */
+.leaflet-control-zoom {
+  display: none;
+}
+
+.leaflet-polygon {
+  cursor: pointer;
+}
+
+.leaflet-polygon:hover {
+  opacity: 0.8;
+}
+
+.leaflet-draw-toolbar {
+  display: none;
+}
