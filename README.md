@@ -95,7 +95,6 @@ git clone https://github.com/Parthiv-01/mwv-dashboard.git
 cd mwv-dashboard
 npm install
 npm run dev
-Navigate to [http://localhost:3000](http://localhost:3000)
 ```
 
 ## 📖 How to Use
@@ -134,10 +133,11 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **Fallback**: Consistent mock data when API is unavailable
 
 ### Example API Call
+```bash
 const response = await axios.get(
 https://archive-api.open-meteo.com/v1/archive?latitude=22.57&longitude=88.36&start_date=2025-07-24&end_date=2025-08-08&hourly=temperature_2m
 );
-
+```
 
 ## 🔧 Key Implementation Details
 
@@ -196,5 +196,7 @@ The application is deployed on **Vercel** with automatic deployments from the ma
 **Live URL**: [https://mwv-dashboard-fedn.vercel.app/](https://mwv-dashboard-fedn.vercel.app/)
 
 ### Deployment Commands
+```bash
 npm install -g vercel
 vercel --prod
+```
