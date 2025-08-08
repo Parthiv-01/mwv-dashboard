@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { Layout } from 'antd';
 import TimelineSlider from './Timeline/TimelineSlider';
 import MapComponent from './Map/MapComponent';
@@ -24,8 +24,8 @@ const Dashboard: React.FC = () => {
   const isFetchingRef = useRef(false);
   const lastUpdateRef = useRef<string>('');
 
-  // Ensure timeRange dates are valid Date objects
-  const safeTimeRange = React.useMemo(() => {
+  // Extract complex expressions to separate variables
+  const safeTimeRange = useMemo(() => {
     const start = timeRange.start instanceof Date ? timeRange.start : new Date(timeRange.start);
     const end = timeRange.end instanceof Date ? timeRange.end : new Date(timeRange.end);
     
@@ -36,10 +36,16 @@ const Dashboard: React.FC = () => {
     };
   }, [timeRange]);
 
+  // Extract time values for dependency array
+  const timeRangeStartTime = useMemo(() => safeTimeRange.start.getTime(), [safeTimeRange.start]);
+  const timeRangeEndTime = useMemo(() => safeTimeRange.end.getTime(), [safeTimeRange.end]);
+  const timeRangeIsRange = safeTimeRange.isRange;
+  const polygonsLength = polygons.length;
+
   const updatePolygonData = useCallback(async () => {
     if (isFetchingRef.current) return;
     
-    const updateKey = `${safeTimeRange.start.getTime()}-${safeTimeRange.end.getTime()}-${safeTimeRange.isRange}-${polygons.length}`;
+    const updateKey = `${timeRangeStartTime}-${timeRangeEndTime}-${timeRangeIsRange}-${polygonsLength}`;
     if (lastUpdateRef.current === updateKey) return;
     
     isFetchingRef.current = true;
@@ -106,10 +112,10 @@ const Dashboard: React.FC = () => {
     } finally {
       isFetchingRef.current = false;
     }
-  }, [safeTimeRange, polygons, dataSources, selectedDataSource, updatePolygonValue, updatePolygonColor]);
+  }, [safeTimeRange, polygons, dataSources, selectedDataSource, updatePolygonValue, updatePolygonColor, timeRangeStartTime, timeRangeEndTime, timeRangeIsRange, polygonsLength]);
 
   useEffect(() => {
-    if (polygons.length > 0) {
+    if (polygonsLength > 0) {
       const timeoutId = setTimeout(() => {
         updatePolygonData();
       }, 600);
@@ -117,10 +123,10 @@ const Dashboard: React.FC = () => {
       return () => clearTimeout(timeoutId);
     }
   }, [
-    safeTimeRange.start.getTime(), 
-    safeTimeRange.end.getTime(), 
-    safeTimeRange.isRange, 
-    polygons.length,
+    timeRangeStartTime, 
+    timeRangeEndTime, 
+    timeRangeIsRange, 
+    polygonsLength,
     updatePolygonData
   ]);
 

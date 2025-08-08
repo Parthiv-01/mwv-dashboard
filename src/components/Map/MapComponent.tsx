@@ -39,11 +39,7 @@ const createNumberIcon = (number: string) => {
 const ColoredPolygon: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
   const polygonRef = useRef<any>(null);
 
-  if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length === 0) {
-    console.warn(`Invalid coordinates for polygon ${polygon.id}:`, polygon.coordinates);
-    return null;
-  }
-
+  // Move useEffect to top level - always called
   useEffect(() => {
     if (polygonRef.current) {
       const leafletPolygon = polygonRef.current;
@@ -56,6 +52,12 @@ const ColoredPolygon: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
       });
     }
   }, [polygon.color]);
+
+  // Conditional return after hooks
+  if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length === 0) {
+    console.warn(`Invalid coordinates for polygon ${polygon.id}:`, polygon.coordinates);
+    return null;
+  }
 
   return (
     <Polygon
@@ -187,10 +189,24 @@ const MapComponent: React.FC = () => {
   const { polygons } = useDashboardStore();
   const [mounted, setMounted] = useState(false);
 
+  // Move all useEffect hooks to top level
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Add effect to validate polygons on load - after mount useEffect
+  useEffect(() => {
+    if (polygons.length > 0) {
+      console.log('Current polygons:', polygons.map(p => ({
+        id: p.id,
+        name: p.name,
+        coordinatesValid: p.coordinates && Array.isArray(p.coordinates) && p.coordinates.length > 0,
+        coordinatesLength: p.coordinates?.length || 0
+      })));
+    }
+  }, [polygons]);
+
+  // Early return after hooks
   if (!mounted) {
     return <div className="w-full h-96 bg-gray-200 animate-pulse" />;
   }
