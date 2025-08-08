@@ -6,10 +6,9 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { DataSource, ColorRule } from '@/types/dashboard';
 import { useDashboardStore } from '@/store/dashboardStore';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
-// Define icon props to avoid TypeScript errors
 const iconProps = {
   onPointerEnterCapture: undefined,
   onPointerLeaveCapture: undefined
@@ -20,14 +19,13 @@ interface ColorRulesProps {
 }
 
 const colorOptions = [
-  { value: '#ff4d4f', label: 'Red', desc: 'Hot/Critical' },
-  { value: '#faad14', label: 'Orange', desc: 'Warm' },
-  { value: '#52c41a', label: 'Green', desc: 'Normal' },
-  { value: '#1890ff', label: 'Blue', desc: 'Cool' },
-  { value: '#722ed1', label: 'Purple', desc: 'Cold' },
-  { value: '#13c2c2', label: 'Cyan', desc: 'Very Cold' },
-  { value: '#f5222d', label: 'Dark Red', desc: 'Extreme Hot' },
-  { value: '#096dd9', label: 'Dark Blue', desc: 'Extreme Cold' }
+  { value: '#ff4d4f', label: 'Red' },
+  { value: '#faad14', label: 'Orange' },
+  { value: '#52c41a', label: 'Green' },
+  { value: '#1890ff', label: 'Blue' },
+  { value: '#722ed1', label: 'Purple' },
+  { value: '#13c2c2', label: 'Cyan' },
+  { value: '#096dd9', label: 'Dark Blue' }
 ];
 
 const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
@@ -57,15 +55,10 @@ const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
     updateColorRules(dataSource.id, updatedRules);
   };
 
-  // Sort rules by value for better display
-  const sortedRules = [...dataSource.colorRules].sort((a, b) => a.value - b.value);
-
   return (
     <Card size="small" title="Color Coding Rules">
       <div className="mb-4">
-        <Text type="secondary">
-          Define temperature-based color rules for polygon visualization
-        </Text>
+        <Text type="secondary">Define color rules for {dataSource.field}</Text>
       </div>
 
       <div className="mb-4 p-3 bg-gray-50 rounded">
@@ -86,9 +79,8 @@ const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
             <InputNumber
               value={newRule.value}
               onChange={(value) => setNewRule({ ...newRule, value: value || 0 })}
-              placeholder="Temp °C"
+              placeholder="Value"
               style={{ flex: 1 }}
-              step={0.1}
             />
           </div>
           <div className="flex gap-2">
@@ -101,11 +93,10 @@ const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
                 <Option key={color.value} value={color.value}>
                   <div className="flex items-center">
                     <div 
-                      className="w-4 h-4 rounded mr-2 border"
+                      className="w-4 h-4 rounded mr-2"
                       style={{ backgroundColor: color.value }}
                     />
-                    <span>{color.label}</span>
-                    <Text type="secondary" className="ml-1">({color.desc})</Text>
+                    {color.label}
                   </div>
                 </Option>
               ))}
@@ -121,8 +112,8 @@ const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
 
       <List
         size="small"
-        header={<Text strong>Active Rules ({sortedRules.length})</Text>}
-        dataSource={sortedRules}
+        header={<Text strong>Active Rules</Text>}
+        dataSource={dataSource.colorRules}
         renderItem={(rule) => (
           <List.Item
             actions={[
@@ -141,30 +132,18 @@ const ColorRules: React.FC<ColorRulesProps> = ({ dataSource }) => {
               </Popconfirm>
             ]}
           >
-            <div className="flex items-center w-full">
+            <div className="flex items-center">
               <div 
-                className="w-5 h-5 rounded mr-3 border"
+                className="w-4 h-4 rounded mr-2"
                 style={{ backgroundColor: rule.color }}
               />
-              <div className="flex-1">
-                <Text strong>
-                  Temperature {rule.operator} {rule.value}°C
-                </Text>
-                <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  Color: {colorOptions.find(c => c.value === rule.color)?.label || 'Custom'}
-                </Text>
-              </div>
+              <Text>
+                {rule.operator} {rule.value}
+              </Text>
             </div>
           </List.Item>
         )}
       />
-      
-      <div className="mt-3 p-2 bg-blue-50 rounded">
-        <Text type="secondary" style={{ fontSize: 11 }}>
-          💡 Rules are applied in order. More specific conditions should have higher values.
-        </Text>
-      </div>
     </Card>
   );
 };

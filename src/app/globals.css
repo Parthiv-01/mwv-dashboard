@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet CSS fixes */
 .leaflet-container {
   height: 100%;
   width: 100%;
@@ -12,7 +11,6 @@
   border-radius: 8px;
 }
 
-/* Custom styles */
 .ant-layout {
   background: #f0f2f5;
 }
@@ -25,18 +23,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Timeline slider custom styles */
-.react-range-track {
-  background: linear-gradient(to right, #1890ff 0%, #1890ff 100%);
-}
-
-.react-range-thumb {
-  background: #1890ff;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Responsive styles */
 @media (max-width: 768px) {
   .ant-layout-sider {
     position: absolute !important;

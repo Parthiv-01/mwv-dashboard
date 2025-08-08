@@ -35,5 +35,4 @@ export interface WeatherData {
   };
 }
 
-// Add this empty export to ensure the file is treated as a module
 export {};

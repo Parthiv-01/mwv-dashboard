@@ -2,70 +2,59 @@ import axios from 'axios';
 import { WeatherData, ColorRule } from '@/types/dashboard';
 import { format, differenceInHours } from 'date-fns';
 
-const mockDataCache = new Map<string, number>();
-
 export const fetchWeatherData = async (
   lat: number,
   lng: number,
   startDate: Date,
   endDate: Date
 ): Promise<WeatherData> => {
-  // Add production-specific logging
-  console.log(`[PROD] Fetching weather data for ${lat}, ${lng}`);
-  
   try {
     const start = format(startDate, 'yyyy-MM-dd');
     const end = format(endDate, 'yyyy-MM-dd');
     
+    console.log(`Fetching weather data for ${lat}, ${lng} from ${start} to ${end}`);
+    
     const response = await axios.get(
       `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&start_date=${start}&end_date=${end}&hourly=temperature_2m`,
       { 
-        timeout: 20000, // Increased timeout for production
+        timeout: 15000,
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Accept': 'application/json'
         }
       }
     );
     
-    console.log(`[PROD] API Response received:`, response.status);
     return response.data;
-    
   } catch (error) {
-    console.error('[PROD] API Error - Using mock data:', error);
+    console.error('Error fetching weather data:', error);
     
-    // Enhanced mock data for production
-    const seed = Math.abs(lat * lng);
-    const baseTemp = 18 + (seed % 20); // 18-38°C range
+    // Generate consistent mock data based on coordinates
+    const seed = Math.abs(lat + lng * 0.5);
+    const baseTemp = 15 + (seed % 25);
+    const hoursDiff = Math.max(1, differenceInHours(endDate, startDate));
+    
+    const temperatures = Array.from({ length: hoursDiff }, (_, i) => {
+      const hourVariation = Math.sin((i % 24) * Math.PI / 12) * 3;
+      return Number((baseTemp + hourVariation).toFixed(1));
+    });
     
     return {
       hourly: {
-        time: [format(startDate, "yyyy-MM-dd'T'HH:mm")],
-        temperature_2m: [Number(baseTemp.toFixed(1))]
+        time: Array.from({ length: hoursDiff }, (_, i) => {
+          const date = new Date(startDate.getTime() + i * 60 * 60 * 1000);
+          return format(date, "yyyy-MM-dd'T'HH:mm");
+        }),
+        temperature_2m: temperatures
       }
     };
   }
 };
 
-
 export const getPolygonCentroid = (coordinates: [number, number][] | undefined): [number, number] => {
-  // Add comprehensive defensive checks
-  if (!coordinates) {
-    console.warn('getPolygonCentroid: coordinates is undefined');
+  if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
     return [0, 0];
   }
   
-  if (!Array.isArray(coordinates)) {
-    console.warn('getPolygonCentroid: coordinates is not an array:', typeof coordinates);
-    return [0, 0];
-  }
-  
-  if (coordinates.length === 0) {
-    console.warn('getPolygonCentroid: coordinates array is empty');
-    return [0, 0];
-  }
-  
-  // Filter out invalid coordinate pairs
   const validCoordinates = coordinates.filter(coord => {
     return Array.isArray(coord) && 
            coord.length === 2 && 
@@ -76,7 +65,6 @@ export const getPolygonCentroid = (coordinates: [number, number][] | undefined):
   });
   
   if (validCoordinates.length === 0) {
-    console.warn('getPolygonCentroid: no valid coordinates found');
     return [0, 0];
   }
   

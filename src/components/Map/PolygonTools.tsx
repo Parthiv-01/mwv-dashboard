@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Button, List, Typography, Popconfirm, Space } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Button, List, Typography, Popconfirm } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useDashboardStore } from '@/store/dashboardStore';
 
 const { Text } = Typography;
 
-// Define icon props to avoid TypeScript errors
 const iconProps = {
   onPointerEnterCapture: undefined,
   onPointerLeaveCapture: undefined

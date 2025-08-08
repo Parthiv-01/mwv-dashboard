@@ -24,22 +24,9 @@ const Dashboard: React.FC = () => {
   const isFetchingRef = useRef(false);
   const lastUpdateRef = useRef<string>('');
 
-  // Extract complex expressions to separate variables
-  const safeTimeRange = useMemo(() => {
-    const start = timeRange.start instanceof Date ? timeRange.start : new Date(timeRange.start);
-    const end = timeRange.end instanceof Date ? timeRange.end : new Date(timeRange.end);
-    
-    return {
-      start,
-      end,
-      isRange: timeRange.isRange
-    };
-  }, [timeRange]);
-
-  // Extract time values for dependency array
-  const timeRangeStartTime = useMemo(() => safeTimeRange.start.getTime(), [safeTimeRange.start]);
-  const timeRangeEndTime = useMemo(() => safeTimeRange.end.getTime(), [safeTimeRange.end]);
-  const timeRangeIsRange = safeTimeRange.isRange;
+  const timeRangeStartTime = useMemo(() => timeRange.start.getTime(), [timeRange.start]);
+  const timeRangeEndTime = useMemo(() => timeRange.end.getTime(), [timeRange.end]);
+  const timeRangeIsRange = timeRange.isRange;
   const polygonsLength = polygons.length;
 
   const updatePolygonData = useCallback(async () => {
@@ -62,13 +49,13 @@ const Dashboard: React.FC = () => {
           const weatherData = await fetchWeatherData(
             centroid[0],
             centroid[1],
-            safeTimeRange.start,
-            safeTimeRange.end
+            timeRange.start,
+            timeRange.end
           );
 
           let avgTemp = 0;
           
-          if (safeTimeRange.isRange && weatherData.hourly.temperature_2m.length > 1) {
+          if (timeRange.isRange && weatherData.hourly.temperature_2m.length > 1) {
             const validTemps = weatherData.hourly.temperature_2m.filter(temp => 
               temp !== null && temp !== undefined && temp !== 0
             );
@@ -76,31 +63,26 @@ const Dashboard: React.FC = () => {
             if (validTemps.length > 0) {
               avgTemp = validTemps.reduce((sum, temp) => sum + temp, 0) / validTemps.length;
             } else {
-              console.warn(`No valid temperature data for polygon ${polygon.id}`);
               continue;
             }
           } else {
             const singleTemp = weatherData.hourly.temperature_2m[0];
             if (singleTemp === null || singleTemp === undefined || singleTemp === 0) {
-              console.warn(`Invalid temperature data for polygon ${polygon.id}: ${singleTemp}`);
               continue;
             }
             avgTemp = singleTemp;
           }
 
-          if (avgTemp !== 0) {
-            const roundedTemp = Math.round(avgTemp * 10) / 10;
-            updatePolygonValue(polygon.id, roundedTemp);
-            
-            const newColor = applyColorRules(roundedTemp, currentDataSource.colorRules);
-            updatePolygonColor(polygon.id, newColor);
-          }
+          const roundedTemp = Math.round(avgTemp * 10) / 10;
+          updatePolygonValue(polygon.id, roundedTemp);
+          
+          const newColor = applyColorRules(roundedTemp, currentDataSource.colorRules);
+          updatePolygonColor(polygon.id, newColor);
           
         } catch (error) {
           console.error(`Error updating polygon ${polygon.id}:`, error);
           
-          const centroid = getPolygonCentroid(polygon.coordinates);
-          const mockTemp = 15 + ((Math.abs(centroid[0]) + Math.abs(centroid[1])) % 25);
+          const mockTemp = 20 + Math.random() * 15;
           const roundedMockTemp = Math.round(mockTemp * 10) / 10;
           
           updatePolygonValue(polygon.id, roundedMockTemp);
@@ -112,13 +94,13 @@ const Dashboard: React.FC = () => {
     } finally {
       isFetchingRef.current = false;
     }
-  }, [safeTimeRange, polygons, dataSources, selectedDataSource, updatePolygonValue, updatePolygonColor, timeRangeStartTime, timeRangeEndTime, timeRangeIsRange, polygonsLength]);
+  }, [timeRange, polygons, dataSources, selectedDataSource, updatePolygonValue, updatePolygonColor, timeRangeStartTime, timeRangeEndTime, timeRangeIsRange, polygonsLength]);
 
   useEffect(() => {
     if (polygonsLength > 0) {
       const timeoutId = setTimeout(() => {
         updatePolygonData();
-      }, 600);
+      }, 1000);
       
       return () => clearTimeout(timeoutId);
     }

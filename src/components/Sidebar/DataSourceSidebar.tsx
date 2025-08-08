@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, Select, Typography } from 'antd';
+import { Card, Select, Typography, Button } from 'antd';
 import { useDashboardStore } from '@/store/dashboardStore';
 import ColorRules from './ColorRules';
 
@@ -9,7 +9,7 @@ const { Title } = Typography;
 const { Option } = Select;
 
 const DataSourceSidebar: React.FC = () => {
-  const { dataSources, selectedDataSource, setSelectedDataSource } = useDashboardStore();
+  const { dataSources, selectedDataSource, setSelectedDataSource, clearAll } = useDashboardStore();
 
   const currentDataSource = dataSources.find(ds => ds.id === selectedDataSource);
 
@@ -50,8 +50,20 @@ const DataSourceSidebar: React.FC = () => {
       </Card>
 
       {currentDataSource && (
-        <ColorRules dataSource={currentDataSource} />
+        <div className="mb-4">
+          <ColorRules dataSource={currentDataSource} />
+        </div>
       )}
+
+      <Card size="small">
+        <Button 
+          danger 
+          block 
+          onClick={clearAll}
+        >
+          Clear All Data
+        </Button>
+      </Card>
     </div>
   );
 };

@@ -7,7 +7,6 @@ import { useDashboardStore } from '@/store/dashboardStore';
 import { PolygonData } from '@/types/dashboard';
 import 'leaflet/dist/leaflet.css';
 
-// Create simple number label icon
 const createNumberIcon = (number: string) => {
   return L.divIcon({
     html: `
@@ -35,11 +34,9 @@ const createNumberIcon = (number: string) => {
   });
 };
 
-// Custom Polygon component that updates colors directly
 const ColoredPolygon: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
   const polygonRef = useRef<any>(null);
 
-  // Move useEffect to top level - always called
   useEffect(() => {
     if (polygonRef.current) {
       const leafletPolygon = polygonRef.current;
@@ -53,9 +50,7 @@ const ColoredPolygon: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
     }
   }, [polygon.color]);
 
-  // Conditional return after hooks
   if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length === 0) {
-    console.warn(`Invalid coordinates for polygon ${polygon.id}:`, polygon.coordinates);
     return null;
   }
 
@@ -74,14 +69,9 @@ const ColoredPolygon: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
   );
 };
 
-// Component to display simple number labels
 const PolygonNumberLabel: React.FC<{ polygon: PolygonData }> = ({ polygon }) => {
   const getCentroid = (coordinates: [number, number][] | undefined): [number, number] | null => {
-    if (!coordinates || !Array.isArray(coordinates)) {
-      return null;
-    }
-    
-    if (coordinates.length === 0) {
+    if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
       return null;
     }
     
@@ -112,7 +102,6 @@ const PolygonNumberLabel: React.FC<{ polygon: PolygonData }> = ({ polygon }) => 
     return null;
   }
 
-  // Extract just the number from polygon name (e.g., "Polygon 1" -> "1")
   const polygonNumber = polygon.name.replace(/^Polygon\s*/, '') || '?';
   const icon = createNumberIcon(polygonNumber);
 
@@ -189,38 +178,18 @@ const MapComponent: React.FC = () => {
   const { polygons } = useDashboardStore();
   const [mounted, setMounted] = useState(false);
 
-  // Move all useEffect hooks to top level
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Add effect to validate polygons on load - after mount useEffect
-  useEffect(() => {
-    if (polygons.length > 0) {
-      console.log('Current polygons:', polygons.map(p => ({
-        id: p.id,
-        name: p.name,
-        coordinatesValid: p.coordinates && Array.isArray(p.coordinates) && p.coordinates.length > 0,
-        coordinatesLength: p.coordinates?.length || 0
-      })));
-    }
-  }, [polygons]);
-
-  // Early return after hooks
   if (!mounted) {
     return <div className="w-full h-96 bg-gray-200 animate-pulse" />;
   }
 
-  // Filter out polygons with invalid coordinates
   const validPolygons = polygons.filter(polygon => {
     const isValid = polygon.coordinates && 
                    Array.isArray(polygon.coordinates) && 
                    polygon.coordinates.length > 0;
-    
-    if (!isValid) {
-      console.warn(`Filtering out invalid polygon ${polygon.id}:`, polygon);
-    }
-    
     return isValid;
   });
 
@@ -239,7 +208,6 @@ const MapComponent: React.FC = () => {
         
         <PolygonDrawer />
         
-        {/* Render polygons */}
         {validPolygons.map((polygon) => (
           <ColoredPolygon 
             key={polygon.id} 
@@ -247,7 +215,6 @@ const MapComponent: React.FC = () => {
           />
         ))}
         
-        {/* Render simple number labels */}
         {validPolygons.map((polygon) => (
           <PolygonNumberLabel 
             key={`label-${polygon.id}`}
