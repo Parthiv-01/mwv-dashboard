@@ -91,14 +91,10 @@ This dashboard provides an interactive interface for visualizing dynamic weather
 
 ### Installation & Setup
 ```bash
-1. **Clone the repository**
 git clone https://github.com/Parthiv-01/mwv-dashboard.git
 cd mwv-dashboard
-2. **Install dependencies**
 npm install
-3. **Run development server**
 npm run dev
-4. **Open in browser**
 Navigate to [http://localhost:3000](http://localhost:3000)
 ```
 
